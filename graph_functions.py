@@ -321,7 +321,6 @@ def system_analysis(graph: nx.DiGraph):
     if 'view_graphs' not in st.session_state:
         st.session_state['view_graphs'] = []
 
-    st.write(st.session_state['view_graphs'])
     node_list = st.session_state["node_list"]
     edge_list = st.session_state["edge_list"]
     analysis_list = ["Impact of input product on process step", "Impact of process on process",
@@ -342,7 +341,7 @@ def system_analysis(graph: nx.DiGraph):
         st.session_state.show_save_impact = False
         st.session_state.find_recurring_components_clicked = False
 
-    selected_method = st.selectbox("Select the analysis method", options=analysis_list,on_change=method_changed)
+    selected_method = st.selectbox("Select the analysis method", options=analysis_list, on_change=method_changed)
     selectbox_list_1 = []
     selectbox_list_2 = []
     if selected_method == "Impact of input product on process step":
@@ -358,7 +357,6 @@ def system_analysis(graph: nx.DiGraph):
     if selected_method != "Recurring components":
         node1_select = None
         node2_select = None
-
 
         def custom_format_func(option):
             return option['data']["label"]
@@ -376,8 +374,6 @@ def system_analysis(graph: nx.DiGraph):
             if node2_select_label:
                 node2_select = node2_select_label['id']
 
-            # st.write(st.session_state.show_save_impact)
-
         if 'show_save_impact' not in st.session_state:
             st.session_state.show_save_impact = False
 
@@ -385,7 +381,8 @@ def system_analysis(graph: nx.DiGraph):
             st.session_state.show_save_impact = True
 
         check_impact = st.button("check impact", key="check_impact", use_container_width=True,
-                                 disabled=node1_select is None or node2_select is None, on_click=check_impact_clicked) is None
+                                 disabled=node1_select is None or node2_select is None,
+                                 on_click=check_impact_clicked) is None
 
         if st.session_state['show_save_impact']:
             if node1_select and node2_select and nx.has_path(graph, node1_select, node2_select):
@@ -405,23 +402,12 @@ def system_analysis(graph: nx.DiGraph):
                             edge_label = edge['label']
                     graphviz_graph.edge(edge_ids[0], edge_ids[1], edge_label)
                 st.graphviz_chart(graphviz_graph)
-
-                # Code for checking which views are common in both nodes
-                # node1_views = node1_select_label['data']['props']['views']
-                # node2_views = node2_select_label['data']['props']['views']
-                # impact_views_list = []
-                # if len(node1_views) > 0 and len(node2_views) > 0:
-                #     for view_name_1, view_1 in node1_views.items():
-                #         for view_name_2, view_2 in node2_views.items():
-                #             if view_name_1.strip().lower() == view_name_2.strip().lower():
-                #                 impact_views_list.append(view_name_1)
-                # st.info(
-                #     f"{node1_select_label['data']['label']} has impact on {node2_select_label['data']['label']} in {", ".join(impact_views_list)}")
                 relation_list = []
                 st.subheader("Save this impact as a relation")
 
                 def selectbox_change():
                     st.session_state.show_save_impact = True
+
                 selected_view = st.selectbox("Select View for Impact",
                                              options=["Mechanical View", "Basic Engineering View",
                                                       "Sustainability View"], on_change=selectbox_change)
@@ -431,7 +417,8 @@ def system_analysis(graph: nx.DiGraph):
                     relation_list = ["Part of", "Impact on"]
                 elif selected_view == "Sustainability View":
                     relation_list = ["Impacts", "Powers"]
-                selected_impact_relation = st.selectbox("Select relationship", relation_list,on_change=selectbox_change)
+                selected_impact_relation = st.selectbox("Select relationship", relation_list,
+                                                        on_change=selectbox_change)
                 if selected_impact_relation:
 
                     save_impact = st.button(label="Save Impact", key="save_impact", use_container_width=True)
@@ -439,23 +426,21 @@ def system_analysis(graph: nx.DiGraph):
                     if node1_select and node2_select and save_impact:
                         save_edge(node1_select_label['id'], selected_impact_relation, node2_select_label['id'],
                                   selected_view)
-                        # st.session_state['show_save_impact'] = False
                         time.sleep(1)
                         st.rerun()
-                    # st.session_state.show_save_impact = False
             else:
                 st.error(
                     f"{node1_select_label['data']['label']} does not have any impact on {node2_select_label['data']['label']}")
 
     else:
-        node1_select=None
-        node2_select=None
+        node1_select = None
+        node2_select = None
+
         def custom_format_func(option):
             return option['data']["label"]
 
         def node_changed():
             st.session_state.find_recurring_components_clicked = False
-
 
         node1_col, node2_col = st.columns(2)
         with node1_col:
@@ -468,7 +453,8 @@ def system_analysis(graph: nx.DiGraph):
             node2_select_label = st.selectbox("Select second node",
                                               options=[node for node in node_list if
                                                        node != node1_select_label],
-                                              format_func=custom_format_func, key="node2_select", on_change=node_changed)
+                                              format_func=custom_format_func, key="node2_select",
+                                              on_change=node_changed)
             if node2_select_label:
                 node2_select = node2_select_label['id']
 
@@ -477,53 +463,35 @@ def system_analysis(graph: nx.DiGraph):
 
         def click_find_recurring_components_button():
             st.session_state.find_recurring_components_clicked = True
-        find_recurring_components = st.button("Find Recurring Components", key="find_recurring_components", use_container_width=True,on_click=click_find_recurring_components_button,
-                                 disabled=node1_select is None or node2_select is None) is None
 
-        if node1_select and node2_select and st.session_state.find_recurring_components_clicked :
-            st.write(st.session_state.find_recurring_components_clicked)
+        find_recurring_components = st.button("Find Recurring Components", key="find_recurring_components",
+                                              use_container_width=True, on_click=click_find_recurring_components_button,
+                                              disabled=node1_select is None or node2_select is None) is None
+
+        if node1_select and node2_select and st.session_state.find_recurring_components_clicked:
             successors_for_node_1 = list(graph.successors(node1_select))
-            st.write(successors_for_node_1)
-            subgraph_for_node_1 = graph.subgraph(successors_for_node_1)
-            st.write(subgraph_for_node_1)
+            nodes_to_include_in_sub_1 = [node1_select] + successors_for_node_1
+            subgraph_for_node_1 = graph.subgraph(nodes_to_include_in_sub_1)
             successors_for_node_2 = list(graph.successors(node2_select))
-            st.write(successors_for_node_2)
-            subgraph_for_node_2 = graph.subgraph(successors_for_node_2)
-            st.write(subgraph_for_node_2)
-            matcher = isomorphism.GraphMatcher(subgraph_for_node_1, subgraph_for_node_2)
-            similar_structures = [subgraph for subgraph in matcher.subgraph_isomorphisms_iter()]
-            st.write(similar_structures)
-            for structure in similar_structures:
-                st.write(structure)
+            nodes_to_include_in_sub_2 = [node2_select] + successors_for_node_2
+            subgraph_for_node_2 = graph.subgraph(nodes_to_include_in_sub_2)
+            g1 = nx.DiGraph(subgraph_for_node_1)
+            g2 = nx.DiGraph(subgraph_for_node_2)
 
-            # graphviz_graph = graphviz.Digraph()
-            # edge_label = ''
-            # for node_id in subgraph_for_node_1.nodes:
-            #     graphviz_graph.node(node_id,
-            #                         label=next((node['data']['label'] for node in node_list if node['id'] == node_id),
-            #                                    None))
-            # for edge_ids in subgraph_for_node_1.edges:
-            #     for edge in edge_list:
-            #         if edge['source'] == edge_ids[0] and edge['target'] == edge_ids[1]:
-            #             edge_label = edge['label']
-            #     graphviz_graph.edge(edge_ids[0], edge_ids[1], edge_label)
-            # st.graphviz_chart(graphviz_graph)
-            # st.write(nx.draw(subraph_for_node_1))
+            graph_matcher = isomorphism.GraphMatcher(g1, g2)
+            st.write(graph_matcher.is_isomorphic())
+            similar_structures = [subgraph for subgraph in graph_matcher.subgraph_isomorphisms_iter()]
 
-        # Initialize an empty list to store the recurring components
-        # recurring_components = []
-        #
-        # # Use Tarjan's algorithm to find strongly connected components
-        # sccs = list(nx.strongly_connected_components(graph))
-        # st.write(f"Selected -   {sccs} ")
-        #
-        # # Filter out SCCs with more than one node (recurring components)
-        # for scc in sccs:
-        #     if len(scc) > 1:
-        #         recurring_components.append(scc)
-        #
-        # st.write(recurring_components)
-        # st.write(nx.recursive_simple_cycles(graph))
+            if similar_structures:
+                st.info(f"There can be {len(similar_structures)} mappings possible ")
+                with st.expander("Isomorphic Mappings",expanded=False):
+                    for idx, mapping in enumerate(similar_structures, start=1):
+                        st.subheader(f"Mapping {idx}:")
+                        for node_1, node_2 in mapping.items():
+                            st.write(f"Node {node_1} ---> Node {node_2} ")
+                        st.markdown("---")
+            else:
+                st.error("No similar components")
 
 
 def save_edge(source_node, relation, target_node, selected_view):

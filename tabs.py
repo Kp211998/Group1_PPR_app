@@ -14,9 +14,9 @@ import json
 from st_cytoscape import cytoscape
 import pandas as pd
 
+type_list = ["product", "process", "resource"]
 
 
-type_list=["product", "process","resource"]
 # Function to upload graph from JSON
 def upload_graph():
     uploaded_nodes = []
@@ -91,154 +91,6 @@ def node_functions():
         update_node()  # Function call to update node
     elif selected == "Delete Node":
         delete_node()
-
-
-# def create_node():
-#     st.header("Create Node")
-#     # Node type selection box
-#     type_node = st.selectbox("Select node type", ["Resource", "Product", "Process"])
-#
-#     # Input for node label
-#     label = st.text_input("Enter label for the node")
-#
-#     # Adding views
-#     if 'view_names' not in st.session_state:
-#         st.session_state.view_names = []
-#     if 'views' not in st.session_state:
-#         st.session_state.views = []
-#
-#     st.header("Add Views")
-#     selected_view = st.text_input("Enter name for the view")
-#     add_view_button = st.button("Add View")
-#     if add_view_button:
-#         st.session_state.view_names.append(selected_view)
-#
-#     # Add Attributes section
-#     st.header("Add Attributes")
-#     selected_view = st.selectbox("Select View", options=st.session_state.view_names)
-#
-#     # Add Attribute form
-#     with st.form("add_attr_form", clear_on_submit=True):
-#         property_name = st.text_input(f"Enter property name")
-#         target_value = st.text_input(f"Enter target value ")
-#         min_value = st.text_input(f"Enter minimum value ")
-#         max_value = st.text_input(f"Enter maximum value")
-#         unit = st.text_input(f"Enter unit for property")
-#
-#         # Check if the form is submitted
-#         if st.form_submit_button("Submit"):
-#             # Call the add_attribute_data function with the entered values
-#             add_attribute_data(property_name, target_value, min_value, max_value, unit, selected_view)
-#
-#     # Save node button
-#     def on_save_node_click():
-#         position = determine_position(type_node)
-#         save_node(type_node, label, st.session_state['views'], position)
-#
-#     st.button("Save Node", key=str(uuid.uuid4()), help="Click to save node",
-#               on_click=on_save_node_click)
-#
-#
-# def determine_position(type_node):
-#     x_position = 0
-#     y_position = 0
-#
-#     if type_node == "Resource":
-#         for node in st.session_state["node_list"]:
-#             if node["data"]["label"] == "New Resource":
-#                 x_position = node["position"]["x"]
-#                 y_position = node["position"]["y"]
-#                 break
-#     else:
-#         max_y_product_process = 0
-#         max_x_product_process = 0
-#         for node in st.session_state["node_list"]:
-#             if node["type"] in ["Product", "Process"]:
-#                 max_y_product_process = max(max_y_product_process, node["position"]["y"])
-#                 max_x_product_process = max(max_x_product_process, node["position"]["x"])
-#         y_position = max_y_product_process + 100  # Place new node below the last Product/Process node
-#         x_position = max_x_product_process  # Align new node with existing Product/Process nodes
-#
-#     return {"x": x_position, "y": y_position}
-#
-#
-# def add_attribute_data(property_name, target_value, min_value, max_value, unit, view_name):
-#     data = {
-#         "name": property_name,
-#         "target_value": target_value,
-#         "min_value": min_value,
-#         "max_value": max_value,
-#         "unit": unit
-#     }
-#     for view in st.session_state['views']:
-#         if view['view_name'] == view_name:
-#             if 'properties' not in view:
-#                 view['properties'] = []
-#             view['properties'].append(data)
-#             break
-#     else:
-#         view = {
-#             "view_name": view_name,
-#             "properties": [data]
-#         }
-#         st.session_state['views'].append(view)
-#     st.write(st.session_state['views'])
-#
-#
-# def save_node(type_node, label, views, position):
-#     st.session_state["tab_index"] = 1
-#     formatted_views = {}
-#     for view in views:
-#         view_name = view['view_name']
-#         properties = []
-#         for prop in view['properties']:
-#             # Generate a unique ID for each property
-#             prop_id = str(uuid.uuid4())
-#             prop_data = {
-#                 "name": prop['name'],
-#                 "id": prop_id,
-#                 "target_value": prop['target_value'],
-#                 "min_value": prop['min_value'],
-#                 "max_value": prop['max_value'],
-#                 "unit": prop['unit']
-#             }
-#             properties.append(prop_data)
-#         formatted_views[view_name] = {
-#             "id": view.get('id', str(uuid.uuid4())),  # Generate a unique ID for each view if not provided
-#             "properties": properties
-#         }
-#
-#     node = {
-#         "id": str(uuid.uuid4()),  # Generate a unique ID for the node
-#         "type": type_node,
-#         "data": {
-#             "label": label,
-#             "props": {
-#                 "views": formatted_views,
-#                 "active_handle": "resource_connector",
-#                 "active_handle_type": "source"
-#             },
-#             "style": {
-#                 "toolbarPosition": "bottom"
-#             }
-#         },
-#         "position": position,
-#         "width": 150,
-#         "height": 25,
-#         "selected": "false",
-#         "dragging": "false",
-#
-#     }
-#     st.session_state["node_list"].append(node)
-#     st.session_state["views"] = []
-#     st.session_state["view_names"] = []
-
-
-#
-# if 'node_list' not in st.session_state:
-#     st.session_state.node_list = []
-#
- #code without position
 def create_node():
     st.header("Create Node")
     # Node type selection box
@@ -307,7 +159,6 @@ def add_attribute_data(property_name, target_value, min_value, max_value, unit, 
             "properties": [data]
         }
         st.session_state['views'].append(view)
-    st.write(st.session_state['views'])
 
 
 def save_node(type_node, label, views):
@@ -346,6 +197,7 @@ def save_node(type_node, label, views):
     st.session_state["node_list"].append(node)
     st.session_state["views"] = []
     st.session_state["view_names"] = []
+
 
 #
 #
@@ -511,7 +363,8 @@ def create_relation():
             store_edge_button = st.button("Save Relationship", use_container_width=True, type="primary")
             if store_edge_button:
                 save_edge(source_node, relation_name, target_node)
-                st.write(f"{node1_select_label['data']['label']} is {relation_name} {node2_select_label['data']['label']}")
+                st.write(
+                    f"{node1_select_label['data']['label']} is {relation_name} {node2_select_label['data']['label']}")
 
 
 # Function to save edge details
@@ -551,7 +404,6 @@ def update_edge():
 
         # Display current edge properties
         st.write(f"Current properties of edge '{selected_edge_description}':")
-        st.write(selected_edge)
 
         def custom_format_func(option):
             return option['data']["label"]
