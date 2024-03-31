@@ -1,16 +1,10 @@
 import time
-
 import streamlit as st  # Importing the Streamlit library
 import networkx as nx  # Importing NetworkX for graph manipulation
 import graphviz  # Importing Graphviz for visualization
 import uuid
-import numpy as np
 from networkx.algorithms import isomorphism
-from sklearn.cluster import SpectralClustering
-import matplotlib.pyplot as plt
-import numpy as np
-from sklearn.cluster import SpectralClustering
-from pyvis.network import Network
+
 
 
 # Function to output nodes and edges of a graph
@@ -28,31 +22,26 @@ def count_nodes(graph: nx.Graph):
 # Function to check if there is a path between two nodes in a graph
 def check_path(graph: nx.Graph):
     node_list = st.session_state.get('graph_dict', {}).get('nodes', [])
-    node_name_list = []
-    for node_id in graph.nodes:
-        for node in node_list:
-            if node['id'] == node_id:
-                node_name_list.append({'id': node['id'], 'label': node['data']['label']})
 
     def custom_format_func(option):
-        return option["label"]
+        return option["data"]["label"]
 
     node1_col, node2_col = st.columns(2)
     with node1_col:
-        node1_select_label = st.selectbox("Select first node", node_name_list, format_func=custom_format_func,
+        node1_select_label = st.selectbox("Select first node", node_list, format_func=custom_format_func,
                                           key="node1_select")
         node1_select = node1_select_label['id']
     with node2_col:
         node2_select_label = st.selectbox("Select second node",
-                                          options=[node for node in node_name_list if node != node1_select_label],
+                                          options=[node for node in node_list if node != node1_select_label],
                                           format_func=custom_format_func, key="node2_select")
         node2_select = node2_select_label['id']
 
     if node1_select and node2_select and nx.has_path(graph, node1_select, node2_select):
         st.success(
-            f"There is a path between node {node1_select_label['label']} and node {node2_select_label['label']}.")
+            f"There is a path between node {node1_select_label['data']['label']} and node {node2_select_label['data']['label']}.")
     else:
-        st.error(f"There is no path between node {node1_select_label['label']} and node {node2_select_label['label']}.")
+        st.error(f"There is no path between node {node1_select_label['data']['label']} and node {node2_select_label['data']['label']}.")
 
 
 # Function to check if a graph is empty
@@ -77,18 +66,12 @@ def is_directed(graph: nx.Graph):
 # Function to display information about a specific node in a graph
 def specific_node(graph: nx.Graph):
     node_list = st.session_state.get('graph_dict', {}).get('nodes', [])
-    node_name_list = []
-    for node_id in graph.nodes:
-        for node in node_list:
-            if node['id'] == node_id:
-                node_name_list.append({'id': node['id'], 'label': node['data']['label']})
-
     def custom_format_func(option):
-        return option["label"]
+        return option["data"]["label"]
 
     node_select = st.selectbox(
         "Select the node label to see the details",
-        node_name_list, format_func=custom_format_func
+        node_list, format_func=custom_format_func
     )
     if node_select['id']:
         st.write(graph.nodes[node_select['id']])
@@ -97,23 +80,17 @@ def specific_node(graph: nx.Graph):
 # Function to display information about a specific edge in a graph
 def specific_edge(graph: nx.Graph):
     node_list = st.session_state.get('graph_dict', {}).get('nodes', [])
-    node_name_list = []
-    for node_id in graph.nodes:
-        for node in node_list:
-            if node['id'] == node_id:
-                node_name_list.append({'id': node['id'], 'label': node['data']['label']})
-
     def custom_format_func(option):
-        return option["label"]
+        return option["data"]["label"]
 
     node1_col, node2_col = st.columns(2)
     with node1_col:
-        node1_select_label = st.selectbox("Select first node", node_name_list, format_func=custom_format_func,
+        node1_select_label = st.selectbox("Select first node", node_list, format_func=custom_format_func,
                                           key="node1_select")
         node1_select = node1_select_label['id']
     with node2_col:
         node2_select_label = st.selectbox("Select second node",
-                                          options=[node for node in node_name_list if node != node1_select_label],
+                                          options=[node for node in node_list if node != node1_select_label],
                                           format_func=custom_format_func, key="node2_select")
         node2_select = node2_select_label['id']
 
@@ -124,7 +101,7 @@ def specific_edge(graph: nx.Graph):
             if edge:
                 st.write(edge)
         except KeyError:
-            st.error(f"Edge {node1_select_label['label']} to {node2_select_label['label']} does not exist.")
+            st.error(f"Edge {node1_select_label['data']['label']} to {node2_select_label['data']['label']} does not exist.")
 
 
 # Function to calculate and display the density of a graph
@@ -137,23 +114,18 @@ def find_density(graph: nx.Graph):
 def shortest_path(graph: nx.Graph):
     node_list = st.session_state.get('graph_dict', {}).get('nodes', [])
     edge_list = st.session_state.get('graph_dict', {}).get('edges', [])
-    node_name_list = []
-    for node_id in graph.nodes:
-        for node in node_list:
-            if node['id'] == node_id:
-                node_name_list.append({'id': node['id'], 'label': node['data']['label']})
 
     def custom_format_func(option):
-        return option["label"]
+        return option["data"]["label"]
 
     node1_col, node2_col = st.columns(2)
     with node1_col:
-        node1_select = st.selectbox("Select first node", node_name_list, format_func=custom_format_func,
+        node1_select = st.selectbox("Select first node", node_list, format_func=custom_format_func,
                                     key="node1_select")
         node1_select_id = node1_select['id']
     with node2_col:
         node2_select = st.selectbox("Select second node",
-                                    options=[node for node in node_name_list if node != node1_select],
+                                    options=[node for node in node_list if node != node1_select],
                                     format_func=custom_format_func, key="node2_select")
         node2_select_id = node2_select['id']
 
@@ -167,7 +139,7 @@ def shortest_path(graph: nx.Graph):
 
         path_with_arrows = " --> ".join(shortest_path_text)
         st.success(
-            f"The shortest path between {node1_select['label']} and {node2_select['label']} is '{path_with_arrows}'")
+            f"The shortest path between {node1_select['data']['label']} and {node2_select['data']['label']} is '{path_with_arrows}'")
         subgraph = graph.subgraph(shortest_path_for_graph)
         st.write(subgraph)
 
@@ -185,7 +157,7 @@ def shortest_path(graph: nx.Graph):
         st.graphviz_chart(graphviz_graph)
 
     except nx.NetworkXNoPath:
-        st.error(f"There is no path between {node1_select} and {node2_select}")
+        st.error(f"There is no path between {node1_select['data']['label']} and {node2_select['data']['label']}")
 
 
 # Function to calculate and display the shortest paths from a selected start node to all other nodes in a graph
@@ -283,11 +255,6 @@ def minimum_spanning_tree(graph: nx.Graph):
 
 def spanning_tree(graph: nx.Graph):
     node_list = st.session_state.get('graph_dict', {}).get('nodes', [])
-    node_name_list = []
-    for node_id in graph.nodes:
-        for node in node_list:
-            if node['id'] == node_id:
-                node_name_list.append({'id': node['id'], 'label': node['data']['label']})
 
     def custom_format_func(option):
         return option['data']["label"]
@@ -414,7 +381,7 @@ def system_analysis(graph: nx.DiGraph):
                 if selected_view == "Mechanical View":
                     relation_list = ["Part of", "Assembled with"]
                 elif selected_view == "Basic Engineering View":
-                    relation_list = ["Part of", "Impact on"]
+                    relation_list = ["Connected with", "Impact on"]
                 elif selected_view == "Sustainability View":
                     relation_list = ["Impacts", "Powers"]
                 selected_impact_relation = st.selectbox("Select relationship", relation_list,
@@ -444,13 +411,13 @@ def system_analysis(graph: nx.DiGraph):
 
         node1_col, node2_col = st.columns(2)
         with node1_col:
-            node1_select_label = st.selectbox("Select first node", node_list,
+            node1_select_label = st.selectbox("Select the root node first subgraph", node_list,
                                               format_func=custom_format_func,
                                               key="node1_select", on_change=node_changed)
             if node1_select_label:
                 node1_select = node1_select_label['id']
         with node2_col:
-            node2_select_label = st.selectbox("Select second node",
+            node2_select_label = st.selectbox("Select the root node second subgraph",
                                               options=[node for node in node_list if
                                                        node != node1_select_label],
                                               format_func=custom_format_func, key="node2_select",
@@ -479,19 +446,31 @@ def system_analysis(graph: nx.DiGraph):
             g2 = nx.DiGraph(subgraph_for_node_2)
 
             graph_matcher = isomorphism.GraphMatcher(g1, g2)
-            st.write(graph_matcher.is_isomorphic())
+            is_graph_isomorphic=graph_matcher.is_isomorphic()
             similar_structures = [subgraph for subgraph in graph_matcher.subgraph_isomorphisms_iter()]
 
+            if is_graph_isomorphic:
+                st.success("Both the subgraphs are isomorphic.")
+            else:
+                st.warning("The two subgraphs are not completely isomorphic.")
+
             if similar_structures:
-                st.info(f"There can be {len(similar_structures)} mappings possible ")
-                with st.expander("Isomorphic Mappings",expanded=False):
+                st.info(f"The nodes of both the graphs have {len(similar_structures)} isomorphic mapping(s). You can view them in below expander.")
+                with st.expander("Isomorphic Mappings", expanded=False):
                     for idx, mapping in enumerate(similar_structures, start=1):
                         st.subheader(f"Mapping {idx}:")
                         for node_1, node_2 in mapping.items():
-                            st.write(f"Node {node_1} ---> Node {node_2} ")
+                            node_1_label = next((node['data']['label'] for node in node_list if node['id'] == node_1),
+                                                None)
+                            node_2_label = next((node['data']['label'] for node in node_list if node['id'] == node_2),
+                                                None)
+                        st.write(
+                            f"Node <b>{node_1_label}</b> in first graph maps with  ---> Node <b>{node_2_label}</b> in second graph",
+                            unsafe_allow_html=True)
+
                         st.markdown("---")
             else:
-                st.error("No similar components")
+                st.error("No similar components found")
 
 
 def save_edge(source_node, relation, target_node, selected_view):
@@ -553,26 +532,3 @@ def save_edge(source_node, relation, target_node, selected_view):
     st.success("Impact edge saved successfully")
     st.session_state.show_save_impact = False
 
-
-def spectral_clustering(graph, num_clusters):
-    adjacency_matrix = nx.adjacency_matrix(graph).todense()
-    spectral = SpectralClustering(n_clusters=num_clusters, affinity='precomputed', random_state=42)
-    labels = spectral.fit_predict(adjacency_matrix)
-    net = Network(height="500px", width="100%", notebook=False)
-    net.barnes_hut()
-
-    # Add nodes
-    for node, label in enumerate(labels):
-        net.add_node(node, label=str(node), color=label)
-
-    # Add edges
-    for edge in graph.edges():
-        net.add_edge(edge[0], edge[1])
-
-    # Show the network
-    net.show("clustered_graph.html")
-    st.components.v1.html(open("clustered_graph.html", "r").read(), width=800, height=600)
-
-    # return labels
-
-# def visualize_clusters(graph, labels):

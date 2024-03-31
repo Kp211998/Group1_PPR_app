@@ -6,7 +6,7 @@ from tabs import (upload_graph, store_graph,
 
 # Initialize session state variables if not present
 if __name__ == '__main__':
-    st.set_page_config(layout='wide')
+    st.set_page_config(layout='wide', page_title="Graph Analyzer", page_icon='chart_with_upwards_trend')
 
     if "node_list" not in st.session_state:
         st.session_state["node_list"] = []
@@ -19,7 +19,6 @@ if __name__ == '__main__':
     if "tab_index" not in st.session_state:
         st.session_state['tab_index'] = 0
 
-
     # Set title of the Streamlit app
     st.title("Graph Analyzer by Group 1")
 
@@ -30,8 +29,8 @@ if __name__ == '__main__':
         "Edge Functions",
         "Store the Graph",
         "Visualize the Graph",
-        "Analyze the Graph",
         "System Analysis",
+        "Analyze the Graph",
         "Export the Graph"
     ]
 

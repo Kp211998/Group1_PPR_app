@@ -8,7 +8,7 @@ from graph_functions import (output_nodes_and_edges, count_nodes, is_empty, find
                              specific_node, specific_edge, shortest_path,
                              spanning_tree,
                              minimum_spanning_tree, system_analysis,
-                             spectral_clustering)  # Importing custom graph functions
+                             )  # Importing custom graph functions
 import time
 import json
 from st_cytoscape import cytoscape
@@ -46,7 +46,7 @@ def upload_graph():
         update_graph_dict()
         st.success("Graph uploaded successfully.")
         st.rerun()
-    st.text("You can click on the below button to create a PPR model and download the JSON file")
+    st.text("You can click on the below button to create a PPR model and download the JSON file in MAPPR app by Mr. David Hoffmann.")
     if 'app_visible' not in st.session_state:
         st.session_state.app_visible = False
     # Button to toggle the embedded app visibility
@@ -91,6 +91,8 @@ def node_functions():
         update_node()  # Function call to update node
     elif selected == "Delete Node":
         delete_node()
+
+
 def create_node():
     st.header("Create Node")
     # Node type selection box
@@ -98,6 +100,14 @@ def create_node():
 
     # Input for node label
     label = st.text_input("Enter label for the node")
+
+    x_col, y_col = st.columns(2)
+
+    with x_col:
+        x_cord = st.number_input("Enter the X Coordinate")
+
+    with y_col:
+        y_cord = st.number_input("Enter the Y Coordinate")
 
     # Adding views
     if 'view_names' not in st.session_state:
@@ -107,7 +117,7 @@ def create_node():
 
     st.header("Add Views")
     selected_view = st.text_input("Enter name for the view")
-    add_view_button = st.button("Add View")
+    add_view_button = st.button("Add View", use_container_width=True)
     if add_view_button and selected_view not in st.session_state.view_names:
         st.session_state.view_names.append(selected_view)
         selected_view = ""  # Clear text input after adding view
@@ -132,11 +142,11 @@ def create_node():
 
     # Save node button (disabled if label is not provided)
     def on_save_node_click():
-        save_node(type_node, label, st.session_state['views'])
+        save_node(type_node, label, st.session_state['views'],float(x_cord), float(y_cord))
 
     save_node_btn_disabled = not label  # Disable button if label is not provided
     save_node_btn = st.button("Save Node", key=str(uuid.uuid4()), help="Click to save node",
-                              on_click=on_save_node_click, disabled=save_node_btn_disabled)
+                              on_click=on_save_node_click, disabled=save_node_btn_disabled, use_container_width=True, type="primary")
 
 
 def add_attribute_data(property_name, target_value, min_value, max_value, unit, view_name):
@@ -161,7 +171,7 @@ def add_attribute_data(property_name, target_value, min_value, max_value, unit, 
         st.session_state['views'].append(view)
 
 
-def save_node(type_node, label, views):
+def save_node(type_node, label, views,x,y):
     st.session_state["tab_index"] = 1
     formatted_views = {}
     for view in views:
@@ -190,9 +200,18 @@ def save_node(type_node, label, views):
         "data": {
             "label": label,
             "props": {
-                "views": formatted_views
+                "views": formatted_views,
+                "active_handle": "resource_connector",
+                "active_handle_type": "source"
+            },
+            "style": {
+                "toolbarPosition": "bottom"
             }
-        }
+        },
+        "position": {
+            "x": x,
+            "y": y
+        },
     }
     st.session_state["node_list"].append(node)
     st.session_state["views"] = []
@@ -263,7 +282,7 @@ def update_node():
             if updated_properties is not None and len(updated_properties) > 0:
                 updated_views[selected_view_to_edit]["properties"][selected_index_for_prop] = updated_properties[0]
 
-        update_node_button = st.button("Update Node", key="update_node_button", help="Click to update node")
+        update_node_button = st.button("Update Node", key="update_node_button", help="Click to update node", use_container_width=True, type="primary")
 
         if update_node_button:
             # Update node properties
@@ -292,14 +311,14 @@ def delete_node():
         st.session_state["node_list"] = [node for node in node_list if node["data"]['label'] != node_to_delete]
 
         # Remove edges connected to the deleted node from the edge list
-        # st.session_state["edge_list"] = [edge for edge in st.session_state["edge_list"]
-        #                                  if edge["source"] != node_to_delete and edge["target"] != node_to_delete]
+        st.session_state["edge_list"] = [edge for edge in st.session_state["edge_list"]
+                                         if edge["source"] != node_to_delete and edge["target"] != node_to_delete]
 
         st.session_state["deleted_node"] = node_to_delete  # Store the deleted node name
 
         st.success(f"Node '{node_to_delete}' has been deleted.")
         time.sleep(1)
-        st.experimental_rerun()
+        st.rerun()
 
 
 # Function to create a relation
@@ -471,7 +490,7 @@ def delete_edge():
 
         st.success(f"Edge '{edge_to_delete}' has been deleted.")
         time.sleep(1)
-        st.experimental_rerun()
+        st.rerun()
 
 
 # Function to display stored graph details
@@ -670,10 +689,9 @@ def visualize_graph():
                    edges=edges,
                    config=config)
     except:
-        st.error("Selected view graph is not available or empty. ")
+        st.error("Selected view graph is not available or empty. You can save impact as a relation in a seperate view graph in **Sysytem Analysis** section. ")
 
 
-# Function to analyze graph
 def analyze_graph():
     update_graph_dict()
     g = nx.DiGraph()
@@ -698,8 +716,8 @@ def analyze_graph():
                                    options=["Output nodes and edges", 'Count nodes', "Show specific node",
                                             "Show specific edge", "Check Path", "Check if Graph is Empty",
                                             "Density of Graph", "Is Graph Directed", "Find shortest Path",
-                                            "Show shortest Path(Soln of Prof.Luder)", "Spanning Tree",
-                                            "Minimum Spanning Tree", "Recurring"])
+                                            "Spanning Tree",
+                                            "Minimum Spanning Tree"])
 
     if select_function == "Output nodes and edges":
         output_nodes_and_edges(graph=g)
@@ -719,14 +737,10 @@ def analyze_graph():
         specific_edge(graph=g)
     elif select_function == "Find shortest Path":
         shortest_path(g)
-    # elif select_function == "Show shortest Path(Soln of Prof.Luder)":
-    #     show_shortest_paths(g)
     elif select_function == "Spanning Tree":
         spanning_tree(g)
     elif select_function == "Minimum Spanning Tree":
         minimum_spanning_tree(g)
-    elif select_function == "Recurring":
-        spectral_clustering(g, 5)
 
 
 def system_analysis_function():
